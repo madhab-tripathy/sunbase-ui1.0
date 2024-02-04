@@ -5,6 +5,9 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 import { PencilIcon, UserPlusIcon,  MinusCircleIcon} from "@heroicons/react/24/solid";
+import { useEffect } from "react";
+
+
 const TABLE_HEAD = ["First Name", "Last Name", "Address", "City", "State", "Email", "Phone", "Action"];
 
 const TABLE_ROWS = [
@@ -21,9 +24,15 @@ const TABLE_ROWS = [
 ];
 const options = [
     'First Name', 'City', 'Email', 'Phone'
-  ];
+];
 const defaultOption = options[0];
+
+
 const SunbaseData = () => {
+
+    useEffect(()=>{
+        
+    },[])
 
     const handaleDropdown = (event) => {
         console.log(event.value);

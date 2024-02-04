@@ -7,47 +7,49 @@ import {
     Input,
     Button,
 } from "@material-tailwind/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useLocalStorage from "../hook/useLocalStorage";
-import { loginUser } from "../utilities/user-service";
-import {useNavigate } from 'react-router-dom';
-const Login = () => {
-    const [user, setUser] = useState({ email: '', password: '' });
-    const [sunbaseToken, setSunbaseToken] = useLocalStorage('sunbase_token', '');
-    const navigate = useNavigate();
+import { createUser } from "../utilities/user-service";
 
-    const handleValidation = () => {
-        if (user.email === ""
-            || user.password === "") {
+const Register = () => {
+//  user state
+    const [user, setUser] = useState({ firstName: '', lastName: '', email: '', password: '' });
+
+    const [sunbaseToken, setSunbaseToken] = useLocalStorage('sunbase_token','');
+// Form validation
+    const handleValidation = ()=>{
+        if(user.email === "" 
+        || user.firstName === "" 
+        || user.lastName === "" 
+        || user.password === ''){
             alert("all fields are required");
         }
-        else if (!user.email.includes('@')) {
+        else if(!user.email.includes('@')){
             alert("invalid email");
         }
     }
 
 
-    const handleSubmit =  (event) => {
+    const handleSubmit = (event) =>{
         event.preventDefault();
         // form validation
         handleValidation();
-
-        loginUser(user).then((res)=>{
-            setSunbaseToken(res.token);
-            setTimeout(()=>{
-                navigate("/customers-info");
-            },500);
+        createUser(user).then((res)=>{
+            console.log(res);
         })
         .catch((err)=>{
             console.log(err);
-        });
+        })
+        ;
+        
+        console.log(user);
     }
 
-    const handleChange = (event) => {
+    const handleChange = (event)=>{
         // spread form data
-        const { name, value } = event.target;
+        const {name, value} = event.target;
         console.log(value);
-        setUser(prevUser => ({ ...prevUser, [name]: value }))
+        setUser(prevUser => ({...prevUser,[name]:value}))
     }
 
     return (
@@ -60,21 +62,34 @@ const Login = () => {
                             className="mb-4 grid h-28 place-items-center"
                             floated="false">
                             <Typography variant="h3" color="white">
-                                Login Page
+                                Register Page
                             </Typography>
                         </CardHeader>
                         <CardBody className="flex flex-col gap-4">
                             <Input
-                                label="Email"
-                                name="email"
-                                type="email"
+                                label="First Name" 
+                                name="firstName" 
+                                size="lg"
+                                onChange={handleChange}
+
+                            />
+                            <Input 
+                                label="Last Name" 
+                                name="lastName" 
                                 size="lg"
                                 onChange={handleChange}
                             />
-                            <Input
-                                label="Password"
-                                name="password"
-                                type="password"
+                            <Input 
+                                label="Email" 
+                                name="email" 
+                                type="email" 
+                                size="lg"
+                                onChange={handleChange}
+                            />
+                            <Input 
+                                label="Password" 
+                                name="password" 
+                                type="password" 
                                 size="lg"
                                 onChange={handleChange}
                             />
@@ -91,4 +106,4 @@ const Login = () => {
     );
 }
 
-export default Login;
+export default Register;
