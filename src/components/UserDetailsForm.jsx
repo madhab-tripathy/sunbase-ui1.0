@@ -5,8 +5,10 @@ import {
     Button,
     Typography,
 } from "@material-tailwind/react";
-import { createCustomer } from "../utilities/user-service";
-import { useState } from "react";
+import { createCustomer, getCustomerById, updateCustomer } from "../utilities/user-service";
+import React, { useEffect, useState } from "react";
+import { useParams } from 'react-router-dom';
+
 const UserDetailsForm = () => {
 
     // customer state
@@ -21,6 +23,16 @@ const UserDetailsForm = () => {
         phone:'',
     });
     const {firstName, lastName, street, city, email, address, state, phone} = customer;
+    const [id, setId] =  useState("");
+    const isEditMode = !!id; // Check if it's in edit mode
+    useEffect(() => {
+        // Get the current URL search parameters
+        const queryParams = new URLSearchParams(window.location.search);
+        // Get the value of the "id" parameter
+        setId(queryParams.get('id'));
+    }, []); 
+    
+    
 
     // form validation
     const handleValidation = ()=>{
@@ -39,11 +51,29 @@ const UserDetailsForm = () => {
             alert("invalid mobile number");
         }
     }
+
+
+    useEffect(() => {
+        // If in edit mode, fetch customer data and set the initial state
+        if (isEditMode) {
+            getCustomerById(id)
+            .then((res) => {
+            setCustomer(res); // getCustomerById returns the customer data
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+        }
+    }, [id, isEditMode]);
+
+
+    // handle submited form data by user
     const handleSubmit = (event) => {
         event.preventDefault();
         handleValidation();
-        console.log(localStorage.getItem('sunbase_token'));
-        createCustomer(customer).then((res)=>{
+        // create and update both are evaluating here
+        const apiCall = isEditMode ? updateCustomer : createCustomer;
+        apiCall(customer,id).then((res)=>{
             console.log(res);
         })
         .catch((err)=>{
@@ -63,7 +93,7 @@ const UserDetailsForm = () => {
                     color="blue-gray"
                     className="text-2xl font-bold text-center leading-none m-4"
                 >
-                    Customer Details
+                    {isEditMode ? "Edit Customer" : "Add Customer"}
                 </Typography>
                 <Card color="transparent" shadow={false} className="max-w-screen-lg sm:w-92 md:w-3/5">
 
@@ -76,18 +106,21 @@ const UserDetailsForm = () => {
                                         name="firstName"
                                         onChange={handleChange}
                                         size="lg" 
+                                        value={firstName}
                                     />
                                     <Input 
                                         label="Street" 
                                         name="street"
                                         onChange={handleChange}
                                         size="lg" 
+                                        value={street}
                                     />
                                     <Input 
                                         label="City" 
                                         name="city"
                                         onChange={handleChange}
                                         size="lg" 
+                                        value={city}
                                     />
                                     <Input 
                                         label="Email" 
@@ -95,6 +128,7 @@ const UserDetailsForm = () => {
                                         name="email"
                                         onChange={handleChange}
                                         size="lg" 
+                                        value={email}
                                     />
                                 </div>
                                 <div className="flex flex-col gap-4 w-full">
@@ -103,9 +137,11 @@ const UserDetailsForm = () => {
                                         name="lastName"
                                         onChange={handleChange}
                                         size="lg" 
+                                        value={lastName}
                                     />
                                     <Input 
-                                        label="Address" 
+                                        label="Address"
+                                        value={address}
                                         name="address"
                                         onChange={handleChange}
                                         size="lg" 
@@ -113,6 +149,7 @@ const UserDetailsForm = () => {
                                     <Input 
                                         label="State" 
                                         name="state"
+                                        value={state}
                                         onChange={handleChange}
                                         size="lg" 
                                     />
@@ -121,6 +158,7 @@ const UserDetailsForm = () => {
                                         name="phone"
                                         onChange={handleChange}
                                         size="lg" 
+                                        value={phone}
                                     />
                                 </div>
 
@@ -128,7 +166,7 @@ const UserDetailsForm = () => {
 
                         </div>
                         <Button type="submit" className="capitalize" style={{ marginTop: "1em" }} color="blue" half="true">
-                            Submit
+                            {isEditMode ? "Update" : "Submit"}
                         </Button>
                     </form>
                 </Card>

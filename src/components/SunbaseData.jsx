@@ -5,38 +5,70 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 import { PencilIcon, UserPlusIcon,  MinusCircleIcon} from "@heroicons/react/24/solid";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getAllCustomers, deleteCustomer, syncCustomer} from "../utilities/user-service";
 
 
 const TABLE_HEAD = ["First Name", "Last Name", "Address", "City", "State", "Email", "Phone", "Action"];
 
-const TABLE_ROWS = [
-    {
-        name: "John Michael",
-        job: "Manager",
-        date: "23/04/18",
-    },
-    {
-        name: "Alexa Liras",
-        job: "Developer",
-        date: "23/04/18",
-    },
-];
+const TABLE_ROWS = [];
 const options = [
     'First Name', 'City', 'Email', 'Phone'
 ];
 const defaultOption = options[0];
 
-
 const SunbaseData = () => {
 
+    const [tableRows, setTableRows] = useState([{
+        firstName:'',
+        lastName:'',
+        address:'',
+        city:'',
+        state:'',
+        email:'',
+        phone:'',
+        uuid:''
+    }])
+
+    const [email,setEmail] = useState("");
+    const [customerId, setCustomerId] = useState("");
+    // fetch all data in table
     useEffect(()=>{
-        
+        const fetchTableData = ()=>{
+            getAllCustomers().then((res)=>{
+                setTableRows(prevData => [...res]);
+            }).catch((err)=>{
+                console.error(err);
+            })
+        }
+        fetchTableData();
     },[])
+    // delete customer
+    const handleDelete = (uuid)=>{
+        deleteCustomer(uuid).then((res)=>{
+            console.log(res);
+            window.location.href = "#";
+        })
+        .catch((err)=>{
+            console.error(err);
+        });
+    }
+
+    // handaleSyncData
+    const handleSyncData = ()=>{
+        syncCustomer().then((res)=>{
+            setTableRows(prevData => [...res]);
+        }).catch((err)=>{
+            console.error(err);
+        })
+    }
 
     const handaleDropdown = (event) => {
+        
         console.log(event.value);
     }
+
+
     return (
         <>
             <Typography
@@ -45,10 +77,12 @@ const SunbaseData = () => {
             >
                 Customer List
             </Typography>
-            <div className="m-4 flex gap-2">
-                <Button className="flex items-center gap-3 rounded-md capitalize mb-2" size="sm">
-                    <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add Customer
-                </Button>
+            <div className="m-4 flex gap-2 items-center">
+                <a href="/customer-form">
+                    <Button className="flex items-center gap-3 rounded-md capitalize" size="sm">
+                        <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add Customer
+                    </Button>
+                </a>
                 <Dropdown options={options} onChange={handaleDropdown} value={defaultOption} placeholder="Select an option" />
                 <div>
                     <Input
@@ -56,6 +90,9 @@ const SunbaseData = () => {
                     icon={<MagnifyingGlassIcon className="h-5 w-5" />}
                     />
                 </div>
+                <Button onClick={handleSyncData} className="flex items-center gap-3 rounded-md capitalize" color="blue" size="sm">
+                    <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Sync
+                </Button>
             </div>
             <Card className="h-full w-full overflow-scroll rounded-none">
                 <table className="w-full min-w-max table-auto text-left">
@@ -78,19 +115,19 @@ const SunbaseData = () => {
                         </tr>
                     </thead>
                     <tbody className="bg-black text-white">
-                        {TABLE_ROWS.map(({ name, job, date }, index) => {
+                        {tableRows.map(({ firstName, lastName, address, city, state, email, phone, uuid }, index) => {
                             const isLast = index === TABLE_ROWS.length - 1;
                             const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
 
                             return (
-                                <tr key={name}>
+                                <tr key={index}>
                                     <td className={`${classes}`}>
                                         <Typography
                                             variant="small"
                                             color="blue-gray"
                                             className="font-normal text-white"
                                         >
-                                            {name}
+                                            {firstName}
                                         </Typography>
                                     </td>
                                     <td className={classes}>
@@ -99,7 +136,7 @@ const SunbaseData = () => {
                                             color="blue-gray"
                                             className="font-normal text-white"
                                         >
-                                            {job}
+                                            {lastName}
                                         </Typography>
                                     </td>
                                     <td className={classes}>
@@ -108,7 +145,7 @@ const SunbaseData = () => {
                                             color="blue-gray"
                                             className="font-normal text-white"
                                         >
-                                            {date}
+                                            {address}
                                         </Typography>
                                     </td>
                                     <td className={classes}>
@@ -117,7 +154,7 @@ const SunbaseData = () => {
                                             color="blue-gray"
                                             className="font-normal text-white"
                                         >
-                                            {name}
+                                            {city}
                                         </Typography>
                                     </td>
                                     <td className={classes}>
@@ -126,7 +163,7 @@ const SunbaseData = () => {
                                             color="blue-gray"
                                             className="font-normal text-white"
                                         >
-                                            {job}
+                                            {state}
                                         </Typography>
                                     </td>
                                     <td className={classes}>
@@ -135,7 +172,7 @@ const SunbaseData = () => {
                                             color="blue-gray"
                                             className="font-normal text-white"
                                         >
-                                            {date}
+                                            {email}
                                         </Typography>
                                     </td>
                                     <td className={classes}>
@@ -144,7 +181,7 @@ const SunbaseData = () => {
                                             color="blue-gray"
                                             className="font-normal text-white"
                                         >
-                                            {date}
+                                            {phone}
                                         </Typography>
                                     </td>
                                     <td className={classes}>
@@ -152,6 +189,9 @@ const SunbaseData = () => {
                                         <Typography
                                             as="a"
                                             href="#"
+                                            onClick={(e)=>{
+                                                handleDelete(uuid);
+                                            }}
                                             variant="small"
                                             color="blue-gray"
                                             className="font-medium"
@@ -164,14 +204,14 @@ const SunbaseData = () => {
                                         </Typography>
                                         <Typography
                                             as="a"
-                                            href="#"
+                                            href={`/customer-form?id=${uuid}`}                                    
                                             variant="small"
                                             color="blue-gray"
                                             className="font-medium"
                                         >
                                             <Tooltip content="Edit User" className="bg-white text-black">
                                                 <IconButton variant="text">
-                                                <PencilIcon className="h-4 w-4" color="white"/>
+                                                <PencilIcon className="h-4 w-4"  color="white"/>
                                                 </IconButton>
                                             </Tooltip>
                                         </Typography>
