@@ -20,27 +20,33 @@ const Login = () => {
         if (user.email === ""
             || user.password === "") {
             alert("all fields are required");
+            return false;
         }
         else if (!user.email.includes('@')) {
             alert("invalid email");
+            return false;
         }
+        return true;
+
     }
 
 
     const handleSubmit =  (event) => {
         event.preventDefault();
         // form validation
-        handleValidation();
-
-        loginUser(user).then((res)=>{
-            setSunbaseToken(res.token);
-            setTimeout(()=>{
-                navigate("/customers-info");
-            },500);
-        })
-        .catch((err)=>{
-            console.log(err);
-        });
+        
+        if(handleValidation()){
+            loginUser(user).then((res)=>{
+                setSunbaseToken(res.token);
+                alert("login successful");
+                setTimeout(()=>{
+                    navigate("/customers-info");
+                },500);
+            })
+            .catch((err)=>{
+                console.log(err);
+            });
+        }
     }
 
     const handleChange = (event) => {

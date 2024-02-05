@@ -7,8 +7,7 @@ import {
 } from "@material-tailwind/react";
 import { createCustomer, getCustomerById, updateCustomer } from "../utilities/user-service";
 import React, { useEffect, useState } from "react";
-import { useParams } from 'react-router-dom';
-
+import {useNavigate } from 'react-router-dom';
 const UserDetailsForm = () => {
 
     // customer state
@@ -25,6 +24,7 @@ const UserDetailsForm = () => {
     const {firstName, lastName, street, city, email, address, state, phone} = customer;
     const [id, setId] =  useState("");
     const isEditMode = !!id; // Check if it's in edit mode
+    const navigate = useNavigate();
     useEffect(() => {
         // Get the current URL search parameters
         const queryParams = new URLSearchParams(window.location.search);
@@ -45,11 +45,15 @@ const UserDetailsForm = () => {
         || state === ""
         || phone === ""){
             alert("all field are required");
+            return false;
         }else if(!email.includes('@')){
             alert("invalid email");
+            return false;
         }else if(phone.length !== 10){
             alert("invalid mobile number");
+            return false; 
         }
+        return true;
     }
 
 
@@ -58,7 +62,7 @@ const UserDetailsForm = () => {
         if (isEditMode) {
             getCustomerById(id)
             .then((res) => {
-            setCustomer(res); // getCustomerById returns the customer data
+                setCustomer(res); // getCustomerById returns the customer data
             })
             .catch((err) => {
                 console.log(err);
@@ -70,15 +74,21 @@ const UserDetailsForm = () => {
     // handle submited form data by user
     const handleSubmit = (event) => {
         event.preventDefault();
-        handleValidation();
-        // create and update both are evaluating here
-        const apiCall = isEditMode ? updateCustomer : createCustomer;
-        apiCall(customer,id).then((res)=>{
-            console.log(res);
-        })
-        .catch((err)=>{
-            console.log();
-        });
+        if(handleValidation()){
+            // create and update both are evaluating here
+            const apiCall = isEditMode ? updateCustomer : createCustomer;
+            apiCall(customer,id).then((res)=>{
+                alert(isEditMode ? "Update Successfully" : "Customer Added")
+                setTimeout(()=>{
+                    navigate("/customers-info");
+                },500)
+            })
+            .catch((err)=>{
+                alert("authentication error");
+                console.error(err);
+            });
+        }
+    
     }
     const handleChange = (event) => {
         const {name, value} = event.target;

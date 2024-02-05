@@ -10,8 +10,10 @@ import {
 import { useEffect, useState } from "react";
 import useLocalStorage from "../hook/useLocalStorage";
 import { createUser } from "../utilities/user-service";
-
+import {useNavigate } from 'react-router-dom';
 const Register = () => {
+
+    const navigate = useNavigate();
 //  user state
     const [user, setUser] = useState({ firstName: '', lastName: '', email: '', password: '' });
 
@@ -35,14 +37,16 @@ const Register = () => {
         // form validation
         handleValidation();
         createUser(user).then((res)=>{
-            console.log(res);
+            setSunbaseToken(res.token);
+            alert("registration successful");
+            setTimeout(()=>{
+                navigate("/customers-info");
+            },500);
         })
         .catch((err)=>{
             console.log(err);
         })
         ;
-        
-        console.log(user);
     }
 
     const handleChange = (event)=>{

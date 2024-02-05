@@ -80,8 +80,15 @@ export const syncCustomer = ()=>{
     .then((response) => response.data);
 }
 // seach query api
-export const searchCustomer = ()=>{
+export const searchCustomer = (searchOption, query)=>{
+    const axiosNewConfig = {
+        ...axiosConfig,
+        params:{
+            searchOption: searchOption,
+            q: query
+        }
+    }
     return axiosRequest
-    .get(`${CUSTOMER_BASE_URL}/search`,axiosConfig)
+    .get(`${CUSTOMER_BASE_URL}/search`,axiosNewConfig)
     .then((response) => response.data);
 }

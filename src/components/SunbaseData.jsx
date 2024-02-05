@@ -6,7 +6,7 @@ import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 import { PencilIcon, UserPlusIcon,  MinusCircleIcon} from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
-import { getAllCustomers, deleteCustomer, syncCustomer} from "../utilities/user-service";
+import { getAllCustomers, deleteCustomer, syncCustomer, searchCustomer} from "../utilities/user-service";
 
 
 const TABLE_HEAD = ["First Name", "Last Name", "Address", "City", "State", "Email", "Phone", "Action"];
@@ -18,7 +18,7 @@ const options = [
 const defaultOption = options[0];
 
 const SunbaseData = () => {
-
+    // store table data
     const [tableRows, setTableRows] = useState([{
         firstName:'',
         lastName:'',
@@ -32,6 +32,7 @@ const SunbaseData = () => {
 
     const [email,setEmail] = useState("");
     const [customerId, setCustomerId] = useState("");
+    const [searchTerm, setSearchTerm] = useState("")
     // fetch all data in table
     useEffect(()=>{
         const fetchTableData = ()=>{
@@ -43,11 +44,13 @@ const SunbaseData = () => {
         }
         fetchTableData();
     },[])
+
     // delete customer
     const handleDelete = (uuid)=>{
         deleteCustomer(uuid).then((res)=>{
             console.log(res);
             window.location.href = "#";
+            alert(res)
         })
         .catch((err)=>{
             console.error(err);
@@ -63,9 +66,21 @@ const SunbaseData = () => {
         })
     }
 
+    const handleSearch = (event)=>{
+        let query = event.target.value;
+        setSearchTerm(query);
+    }
+
+    // search by terms
     const handaleDropdown = (event) => {
-        
-        console.log(event.value);
+        let search = event.value;
+        searchCustomer(search,searchTerm.toLocaleUpperCase())
+        .then((res)=>{
+            console.log(res);
+        })
+        .catch((err)=>{
+            console.error(err);
+        });
     }
 
 
@@ -88,6 +103,7 @@ const SunbaseData = () => {
                     <Input
                     label="Search"
                     icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                    inputMode={handleSearch}
                     />
                 </div>
                 <Button onClick={handleSyncData} className="flex items-center gap-3 rounded-md capitalize" color="blue" size="sm">
