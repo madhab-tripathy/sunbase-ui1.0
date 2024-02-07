@@ -13,7 +13,7 @@ const TABLE_HEAD = ["First Name", "Last Name", "Address", "City", "State", "Emai
 
 const TABLE_ROWS = [];
 const options = [
-    'First Name', 'City', 'Email', 'Phone'
+    'Search','First Name', 'City', 'Email', 'Phone'
 ];
 const defaultOption = options[0];
 
@@ -32,19 +32,19 @@ const SunbaseData = () => {
 
     const [email,setEmail] = useState("");
     const [customerId, setCustomerId] = useState("");
-    const [searchTerm, setSearchTerm] = useState("")
+    const [searchOption, setSearchOption] = useState("")
     // fetch all data in table
+    const fetchTableData = ()=>{
+        getAllCustomers().then((res)=>{
+            setTableRows(prevData => [...res]);
+        }).catch((err)=>{
+            console.error(err);
+        })
+    }
     useEffect(()=>{
-        const fetchTableData = ()=>{
-            getAllCustomers().then((res)=>{
-                setTableRows(prevData => [...res]);
-            }).catch((err)=>{
-                console.error(err);
-            })
-        }
         fetchTableData();
     },[])
-
+    
     // delete customer
     const handleDelete = (uuid)=>{
         deleteCustomer(uuid).then((res)=>{
@@ -65,22 +65,39 @@ const SunbaseData = () => {
             console.error(err);
         })
     }
-
+    // search input handled
     const handleSearch = (event)=>{
         let query = event.target.value;
-        setSearchTerm(query);
-    }
-
-    // search by terms
-    const handaleDropdown = (event) => {
-        let search = event.value;
-        searchCustomer(search,searchTerm.toLocaleUpperCase())
+        searchCustomer(searchOption,query)
         .then((res)=>{
-            console.log(res);
+            if(res === ""){
+                alert("No result found")
+            }else{
+                setTableRows(res);
+            }
         })
         .catch((err)=>{
             console.error(err);
         });
+    }
+    // search optimization
+    const optimise = (callback,delay)=>{
+        let timer;
+        return function(...args){
+            if(timer){
+                clearTimeout(timer);
+            };
+            timer = setTimeout(() =>{
+                callback(...args);
+            },delay);
+        }
+    }
+    const optimisedFn = optimise(handleSearch,600);
+    
+    // search dropdown handle
+    const handaleDropdown = (event) => {
+        let option = event.value;
+        setSearchOption(option);
     }
 
 
@@ -103,7 +120,7 @@ const SunbaseData = () => {
                     <Input
                     label="Search"
                     icon={<MagnifyingGlassIcon className="h-5 w-5" />}
-                    inputMode={handleSearch}
+                    onKeyUp={optimisedFn}
                     />
                 </div>
                 <Button onClick={handleSyncData} className="flex items-center gap-3 rounded-md capitalize" color="blue" size="sm">

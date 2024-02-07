@@ -92,7 +92,6 @@ const UserDetailsForm = () => {
     }
     const handleChange = (event) => {
         const {name, value} = event.target;
-        console.log(value);
         setCustomer(prevCustomer => ({...prevCustomer,[name]:value}));
     }
 
@@ -165,6 +164,7 @@ const UserDetailsForm = () => {
                                     />
                                     <Input 
                                         label="Phone" 
+                                        type="tel"
                                         name="phone"
                                         onChange={handleChange}
                                         size="lg" 
