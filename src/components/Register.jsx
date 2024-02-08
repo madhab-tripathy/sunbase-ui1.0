@@ -8,16 +8,13 @@ import {
     Button,
 } from "@material-tailwind/react";
 import { useEffect, useState } from "react";
-import useLocalStorage from "../hook/useLocalStorage";
 import { createUser } from "../utilities/user-service";
 import {useNavigate } from 'react-router-dom';
 const Register = () => {
 
     const navigate = useNavigate();
 //  user state
-    const [user, setUser] = useState({ firstName: '', lastName: '', email: '', password: '' });
-
-    const [sunbaseToken, setSunbaseToken] = useLocalStorage('sunbase_token','');
+    const [user, setUser] = useState({});
 // Form validation
     const handleValidation = ()=>{
         if(user.email === "" 
@@ -31,16 +28,16 @@ const Register = () => {
         }
     }
 
-
+//  submit data to srver generated token
     const handleSubmit = (event) =>{
         event.preventDefault();
         // form validation
         handleValidation();
         createUser(user).then((res)=>{
-            setSunbaseToken(res.token);
+            localStorage.setItem('sunbase_token', JSON.stringify(res.token));
             alert("registration successful");
             setTimeout(()=>{
-                navigate("/customers-info");
+                navigate("/user/customers-info");
             },500);
         })
         .catch((err)=>{
@@ -53,7 +50,7 @@ const Register = () => {
         // spread form data
         const {name, value} = event.target;
         console.log(value);
-        setUser(prevUser => ({...prevUser,[name]:value}))
+        setUser(prevUser => ({...prevUser,[name]:value.trim()}))
     }
 
     return (

@@ -8,12 +8,11 @@ import {
     Button,
 } from "@material-tailwind/react";
 import { useState } from "react";
-import useLocalStorage from "../hook/useLocalStorage";
 import { loginUser } from "../utilities/user-service";
 import {useNavigate } from 'react-router-dom';
 const Login = () => {
-    const [user, setUser] = useState({ email: '', password: '' });
-    const [sunbaseToken, setSunbaseToken] = useLocalStorage('sunbase_token', '');
+    const [user, setUser] = useState({});
+    
     const navigate = useNavigate();
 
     const handleValidation = () => {
@@ -37,13 +36,13 @@ const Login = () => {
         
         if(handleValidation()){
             loginUser(user).then((res)=>{
-                setSunbaseToken(res.token);
+                // need to enhance, not good way to do this
+                localStorage.setItem('sunbase_token', JSON.stringify(res.token));
                 alert("login successful");
-                setTimeout(()=>{
-                    navigate("/customers-info");
-                },500);
+                navigate("/user/customers-info");
             })
             .catch((err)=>{
+                alert(err.message);
                 console.log(err);
             });
         }

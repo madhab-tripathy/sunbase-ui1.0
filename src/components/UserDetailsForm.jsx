@@ -8,6 +8,7 @@ import {
 import { createCustomer, getCustomerById, updateCustomer } from "../utilities/user-service";
 import React, { useEffect, useState } from "react";
 import {useNavigate } from 'react-router-dom';
+import { getToken } from "../auth";
 const UserDetailsForm = () => {
 
     // customer state
@@ -60,31 +61,31 @@ const UserDetailsForm = () => {
     useEffect(() => {
         // If in edit mode, fetch customer data and set the initial state
         if (isEditMode) {
-            getCustomerById(id)
+            getCustomerById(id,getToken())
             .then((res) => {
                 setCustomer(res); // getCustomerById returns the customer data
             })
             .catch((err) => {
+                alert(err.message);
                 console.log(err);
             });
         }
     }, [id, isEditMode]);
-
-
+    
     // handle submited form data by user
     const handleSubmit = (event) => {
         event.preventDefault();
         if(handleValidation()){
             // create and update both are evaluating here
             const apiCall = isEditMode ? updateCustomer : createCustomer;
-            apiCall(customer,id).then((res)=>{
+            apiCall(customer,id,getToken()).then((res)=>{
                 alert(isEditMode ? "Update Successfully" : "Customer Added")
                 setTimeout(()=>{
                     navigate("/customers-info");
                 },500)
             })
             .catch((err)=>{
-                alert("authentication error");
+                alert(err.message);
                 console.error(err);
             });
         }

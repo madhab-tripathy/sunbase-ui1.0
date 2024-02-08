@@ -7,11 +7,11 @@ import 'react-dropdown/style.css';
 import { PencilIcon, UserPlusIcon,  MinusCircleIcon} from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { getAllCustomers, deleteCustomer, syncCustomer, searchCustomer} from "../utilities/user-service";
+import { getToken } from "../auth";
+import { useNavigate } from "react-router-dom";
 
+const TABLE_HEAD = ["First Name", "Last Name", "Address", "Street", "City", "State", "Email", "Phone", "Action"];
 
-const TABLE_HEAD = ["First Name", "Last Name", "Address", "City", "State", "Email", "Phone", "Action"];
-
-const TABLE_ROWS = [];
 const options = [
     'Search','First Name', 'City', 'Email', 'Phone'
 ];
@@ -19,56 +19,53 @@ const defaultOption = options[0];
 
 const SunbaseData = () => {
     // store table data
-    const [tableRows, setTableRows] = useState([{
-        firstName:'',
-        lastName:'',
-        address:'',
-        city:'',
-        state:'',
-        email:'',
-        phone:'',
-        uuid:''
-    }])
+    const [tableRows, setTableRows] = useState([{}])
 
-    const [email,setEmail] = useState("");
-    const [customerId, setCustomerId] = useState("");
-    const [searchOption, setSearchOption] = useState("")
-    // fetch all data in table
+    const [searchOption, setSearchOption] = useState("");
+    
+    let navigate = useNavigate();
+    
     const fetchTableData = ()=>{
-        getAllCustomers().then((res)=>{
+        getAllCustomers(getToken()).then((res)=>{
             setTableRows(prevData => [...res]);
+            navigate("/user/customers-info");
         }).catch((err)=>{
+            alert(err.message);
             console.error(err);
         })
     }
+
     useEffect(()=>{
         fetchTableData();
     },[])
     
     // delete customer
     const handleDelete = (uuid)=>{
-        deleteCustomer(uuid).then((res)=>{
+        console.log(getToken());
+        deleteCustomer(uuid,getToken()).then((res)=>{
             console.log(res);
-            window.location.href = "#";
+            navigate("/user/customers-info")
             alert(res)
         })
         .catch((err)=>{
+            alert(err.message);
             console.error(err);
         });
     }
 
     // handaleSyncData
     const handleSyncData = ()=>{
-        syncCustomer().then((res)=>{
+        syncCustomer(getToken()).then((res)=>{
             setTableRows(prevData => [...res]);
         }).catch((err)=>{
+            alert(err.message);
             console.error(err);
         })
     }
     // search input handled
     const handleSearch = (event)=>{
         let query = event.target.value;
-        searchCustomer(searchOption,query)
+        searchCustomer(searchOption,query,getToken())
         .then((res)=>{
             if(res === ""){
                 alert("No result found")
@@ -77,6 +74,7 @@ const SunbaseData = () => {
             }
         })
         .catch((err)=>{
+            alert(err.message);
             console.error(err);
         });
     }
@@ -148,8 +146,8 @@ const SunbaseData = () => {
                         </tr>
                     </thead>
                     <tbody className="bg-black text-white">
-                        {tableRows.map(({ firstName, lastName, address, city, state, email, phone, uuid }, index) => {
-                            const isLast = index === TABLE_ROWS.length - 1;
+                        {tableRows.map(({ firstName, lastName, address, street, city, state, email, phone, uuid }, index) => {
+                            const isLast = index === tableRows.length - 1;
                             const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
 
                             return (
@@ -188,6 +186,15 @@ const SunbaseData = () => {
                                             className="font-normal text-white"
                                         >
                                             {city}
+                                        </Typography>
+                                    </td>
+                                    <td className={classes}>
+                                        <Typography
+                                            variant="small"
+                                            color="blue-gray"
+                                            className="font-normal text-white"
+                                        >
+                                            {street}
                                         </Typography>
                                     </td>
                                     <td className={classes}>
